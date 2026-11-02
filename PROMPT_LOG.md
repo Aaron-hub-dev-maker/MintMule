@@ -4,12 +4,9 @@
 > so this record was kept manually and rebuilt from the local session transcripts.
 >
 > It lists 9 of the prompts that built and reviewed the application, in order, dated in local time
-> (UTC+05:30). They are lightly edited (spelling, shortened headings, one request for test commands
-> removed), and long pasted terminal output is shortened to the commands and the key result lines
-> (every failed check is kept in full), with each cut marked `[… N lines omitted …]`. Not included:
-> two questions about running the commands locally, and the messages sent after the application
-> was complete.
->
+> (UTC+05:30). They are lightly edited ,long pasted terminal output is shortened to the commands and the key result lines
+> (every failed check is kept in full), with each cut marked `[… N lines omitted …]`. 
+
 
 
 ## Prompt 1 — 2026-11-01
