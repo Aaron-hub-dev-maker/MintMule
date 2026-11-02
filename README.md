@@ -77,8 +77,8 @@ follow the same steps.
 ### 1. Get the code
 
 ```bash
-git clone https://github.com/<your-user>/mintmule.git
-cd mintmule
+git clone https://github.com/Aaron-hub-dev-maker/MintMule.git
+cd MintMule
 ```
 
 Or unzip the submission and open a terminal in the extracted folder.
