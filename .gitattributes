@@ -1,0 +1,4 @@
+# Keep every text file LF on checkout on every platform: checksums.sha256 hashes exact bytes,
+# and the generator copies schema.sql and docs/ into each dataset folder.
+* text=auto eol=lf
+*.db binary
