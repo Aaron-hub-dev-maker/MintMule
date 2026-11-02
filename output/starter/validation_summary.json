@@ -1,0 +1,245 @@
+{
+  "validator": "generator.validator (independent: reads CSV files and schema.sql only)",
+  "total_findings": 20,
+  "findings_by_check": {
+    "ALERT_WITHOUT_TRIGGER": 4,
+    "DISPOSITION_BEFORE_ALERT": 4,
+    "NEGATIVE_BALANCE_NO_OVERDRAFT": 4,
+    "TRANSFER_LEG_MISMATCH": 4,
+    "TXN_ON_CLOSED_ACCOUNT": 4
+  },
+  "ground_truth_reconciliation": {
+    "expected_edge_cases": 20,
+    "flagged_findings": 20,
+    "matched": 20,
+    "missing": [],
+    "unexpected": [],
+    "exact_match": true
+  },
+  "metrics": {
+    "row_counts": {
+      "customers": 200,
+      "kyc_profiles": 200,
+      "accounts": 280,
+      "merchants": 63,
+      "devices": 276,
+      "account_devices": 394,
+      "account_status_history": 321,
+      "risk_rules": 6,
+      "transactions": 4000,
+      "transfer_links": 142,
+      "alerts": 40,
+      "alert_transactions": 100,
+      "cases": 39,
+      "case_alerts": 40,
+      "analyst_actions": 117
+    },
+    "alerts_by_rule": {
+      "RULE-001": 3,
+      "RULE-002": 3,
+      "RULE-003": 3,
+      "RULE-004": 3,
+      "RULE-005": 28
+    },
+    "alert_score": {
+      "min": 77.45,
+      "median": 85.62,
+      "max": 95.43
+    },
+    "alert_status": {
+      "CONFIRMED": 10,
+      "ESCALATED": 6,
+      "FALSE_POSITIVE": 23,
+      "OPEN": 1
+    },
+    "case_status": {
+      "CLOSED": 32,
+      "ESCALATED": 6,
+      "OPEN": 1
+    },
+    "disposition_false_positive_rate_by_rule": {
+      "RULE-001": 0.3333,
+      "RULE-002": 0.3333,
+      "RULE-003": 0.3333,
+      "RULE-004": 0.3333,
+      "RULE-005": 0.7037
+    },
+    "planted_pattern_detection": {
+      "CIRCULAR_TRANSFER/BENIGN": {
+        "planted": 1,
+        "detected": 1
+      },
+      "CIRCULAR_TRANSFER/SUSPICIOUS": {
+        "planted": 2,
+        "detected": 2
+      },
+      "DORMANT_REACTIVATION/BENIGN": {
+        "planted": 1,
+        "detected": 1
+      },
+      "DORMANT_REACTIVATION/SUSPICIOUS": {
+        "planted": 2,
+        "detected": 2
+      },
+      "HIGH_AMOUNT_VS_PROFILE/BENIGN": {
+        "planted": 34,
+        "detected": 25
+      },
+      "HIGH_AMOUNT_VS_PROFILE/SUSPICIOUS": {
+        "planted": 2,
+        "detected": 2
+      },
+      "NEW_DEVICE_ACTIVITY/BENIGN": {
+        "planted": 1,
+        "detected": 1
+      },
+      "NEW_DEVICE_ACTIVITY/SUSPICIOUS": {
+        "planted": 2,
+        "detected": 2
+      },
+      "VELOCITY_SPIKE/BENIGN": {
+        "planted": 1,
+        "detected": 1
+      },
+      "VELOCITY_SPIKE/SUSPICIOUS": {
+        "planted": 2,
+        "detected": 2
+      }
+    },
+    "ground_truth_false_positive_rate_by_rule": {
+      "RULE-001": 0.3333,
+      "RULE-002": 0.3333,
+      "RULE-003": 0.3333,
+      "RULE-004": 0.3333,
+      "RULE-005": 0.9286
+    },
+    "disposition_vs_ground_truth": {
+      "BENIGN->ESCALATED": 6,
+      "BENIGN->FALSE_POSITIVE": 23,
+      "BENIGN->NOT_YET_DISPOSITIONED": 1,
+      "SUSPICIOUS->CONFIRMED": 10
+    }
+  },
+  "findings": [
+    {
+      "check": "ALERT_WITHOUT_TRIGGER",
+      "table": "alerts",
+      "record_id": "ALT-2026-000002",
+      "message": "no alert_transactions rows"
+    },
+    {
+      "check": "ALERT_WITHOUT_TRIGGER",
+      "table": "alerts",
+      "record_id": "ALT-2026-000010",
+      "message": "no alert_transactions rows"
+    },
+    {
+      "check": "ALERT_WITHOUT_TRIGGER",
+      "table": "alerts",
+      "record_id": "ALT-2026-000023",
+      "message": "no alert_transactions rows"
+    },
+    {
+      "check": "ALERT_WITHOUT_TRIGGER",
+      "table": "alerts",
+      "record_id": "ALT-2026-000030",
+      "message": "no alert_transactions rows"
+    },
+    {
+      "check": "DISPOSITION_BEFORE_ALERT",
+      "table": "analyst_actions",
+      "record_id": "ACT-2026-000007",
+      "message": "CASE-2026-000003 #3 DISPOSITION at 2026-02-02T13:45:35"
+    },
+    {
+      "check": "DISPOSITION_BEFORE_ALERT",
+      "table": "analyst_actions",
+      "record_id": "ACT-2026-000072",
+      "message": "CASE-2026-000024 #3 DISPOSITION at 2026-07-10T15:59:47"
+    },
+    {
+      "check": "DISPOSITION_BEFORE_ALERT",
+      "table": "analyst_actions",
+      "record_id": "ACT-2026-000112",
+      "message": "CASE-2026-000038 #3 DISPOSITION at 2026-10-04T00:30:00"
+    },
+    {
+      "check": "DISPOSITION_BEFORE_ALERT",
+      "table": "analyst_actions",
+      "record_id": "ACT-2026-000117",
+      "message": "CASE-2026-000039 #3 DISPOSITION at 2026-10-09T15:47:09"
+    },
+    {
+      "check": "NEGATIVE_BALANCE_NO_OVERDRAFT",
+      "table": "transactions",
+      "record_id": "TXN-2026-00003989",
+      "message": "ACC-CUS-000067-01: before 1637.33 DEBIT 1896.79 -> after -259.46"
+    },
+    {
+      "check": "NEGATIVE_BALANCE_NO_OVERDRAFT",
+      "table": "transactions",
+      "record_id": "TXN-2026-00003990",
+      "message": "ACC-CUS-000126-02: before 43537.96 DEBIT 43847.21 -> after -309.25"
+    },
+    {
+      "check": "NEGATIVE_BALANCE_NO_OVERDRAFT",
+      "table": "transactions",
+      "record_id": "TXN-2026-00003991",
+      "message": "ACC-CUS-000170-01: before 3263.74 DEBIT 3436.45 -> after -172.71"
+    },
+    {
+      "check": "NEGATIVE_BALANCE_NO_OVERDRAFT",
+      "table": "transactions",
+      "record_id": "TXN-2026-00003992",
+      "message": "ACC-CUS-000173-02: before 17836.60 DEBIT 18106.71 -> after -270.11"
+    },
+    {
+      "check": "TRANSFER_LEG_MISMATCH",
+      "table": "transfer_links",
+      "record_id": "TRF-2026-000139",
+      "message": "link 1668.36, debit leg 1668.36, credit leg 1641.37"
+    },
+    {
+      "check": "TRANSFER_LEG_MISMATCH",
+      "table": "transfer_links",
+      "record_id": "TRF-2026-000140",
+      "message": "link 2962.29, debit leg 2962.29, credit leg 2939.32"
+    },
+    {
+      "check": "TRANSFER_LEG_MISMATCH",
+      "table": "transfer_links",
+      "record_id": "TRF-2026-000141",
+      "message": "link 953.56, debit leg 953.56, credit leg 939.57"
+    },
+    {
+      "check": "TRANSFER_LEG_MISMATCH",
+      "table": "transfer_links",
+      "record_id": "TRF-2026-000142",
+      "message": "link 1637.08, debit leg 1637.08, credit leg 1587.17"
+    },
+    {
+      "check": "TXN_ON_CLOSED_ACCOUNT",
+      "table": "transactions",
+      "record_id": "TXN-2026-00003985",
+      "message": "ACC-CUS-000009-01 at 2026-06-13T06:26:55"
+    },
+    {
+      "check": "TXN_ON_CLOSED_ACCOUNT",
+      "table": "transactions",
+      "record_id": "TXN-2026-00003986",
+      "message": "ACC-CUS-000054-02 at 2026-05-18T22:09:43"
+    },
+    {
+      "check": "TXN_ON_CLOSED_ACCOUNT",
+      "table": "transactions",
+      "record_id": "TXN-2026-00003987",
+      "message": "ACC-CUS-000122-01 at 2026-07-15T08:20:10"
+    },
+    {
+      "check": "TXN_ON_CLOSED_ACCOUNT",
+      "table": "transactions",
+      "record_id": "TXN-2026-00003988",
+      "message": "ACC-CUS-000140-01 at 2026-02-26T19:00:22"
+    }
+  ]
+}

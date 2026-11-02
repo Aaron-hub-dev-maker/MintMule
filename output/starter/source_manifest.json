@@ -1,0 +1,51 @@
+{
+  "generator": "synthetic-aml-review-generator",
+  "generator_version": "1.0.0",
+  "data_origin": "synthetic",
+  "statement": "All records are synthetic, produced by a seeded random generator. No real personal data and no external data sources were used; names are built from a fixed syllable list.",
+  "external_sources": [],
+  "personal_data": "none",
+  "seed": 20261022,
+  "profile": "starter",
+  "parameters": {
+    "customers": 200,
+    "accounts": 280,
+    "transactions": 4000,
+    "alerts": 40,
+    "edge_cases_per_type": 4
+  },
+  "reference_calendar": {
+    "history_start": "2016-01-01T00:00:00",
+    "window_start": "2026-01-01T00:00:00",
+    "window_end": "2026-10-15T23:59:59",
+    "snapshot_as_of": "2026-10-22T00:00:00"
+  },
+  "environment": {
+    "python": "3.11.0",
+    "numpy": "2.2.1",
+    "pandas": "2.2.3"
+  },
+  "row_counts": {
+    "customers": 200,
+    "kyc_profiles": 200,
+    "accounts": 280,
+    "merchants": 63,
+    "devices": 276,
+    "account_devices": 394,
+    "account_status_history": 321,
+    "risk_rules": 6,
+    "transactions": 4000,
+    "transfer_links": 142,
+    "alerts": 40,
+    "alert_transactions": 100,
+    "cases": 39,
+    "case_alerts": 40,
+    "analyst_actions": 117
+  },
+  "ground_truth_rows": {
+    "EDGE_CASE": 20,
+    "FALSE_POSITIVE_PLANT": 38,
+    "PLANTED_PATTERN": 10
+  },
+  "generated_at": "omitted on purpose: outputs must be byte-identical for the same seed"
+}
