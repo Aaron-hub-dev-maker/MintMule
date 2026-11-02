@@ -1,4 +1,8 @@
-# Synthetic AML analyst-review dataset generator
+# MintMule: synthetic AML analyst-review dataset generator
+
+**MintMule** *mints* synthetic banking data, including the money-*mule* style patterns that AML
+analysts hunt for. Each `source_manifest.json` identifies the generator as
+`synthetic-aml-review-generator` 1.0.0.
 
 A reproducible generator of **synthetic** data for a fraud / AML-style workflow that prioritises
 transactions and linked accounts for analyst review using transparent rules. It produces
@@ -73,8 +77,8 @@ follow the same steps.
 ### 1. Get the code
 
 ```bash
-git clone <repository-url>
-cd <repository-folder>
+git clone https://github.com/<your-user>/mintmule.git
+cd mintmule
 ```
 
 Or unzip the submission and open a terminal in the extracted folder.
