@@ -1,27 +1,19 @@
 # Prompt log
 
-> About this log. AI responses are omitted. No tool in this environment exported the prompts automatically, so this record was kept manually.
+> AI responses are omitted. The AI tool used, Claude Code (desktop app), does not export prompts,
+> so this record was kept manually and rebuilt from the local session transcripts.
+>
+> It lists 9 of the prompts that built and reviewed the application, in order, dated in local time
+> (UTC+05:30). They are lightly edited (spelling, shortened headings, one request for test commands
+> removed), and long pasted terminal output is shortened to the commands and the key result lines
+> (every failed check is kept in full), with each cut marked `[… N lines omitted …]`. Not included:
+> two questions about running the commands locally, and the messages sent after the application
+> was complete.
+>
 
-> It contains the four prompts that specified and changed the application, in order and dated.
-
-
-> Not included
-> - five messages that pasted terminal output from local test runs, with at most a one-line question
-
-
-> Fixes without a prompt of their own. Two of those test runs surfaced problems that were then fixed:
-> - a stale local database file that broke the checksum comparison
-> - benign RULE-005 outliers leading the alert queue, which led to the per-rule score ceilings
-> (RULE-005 capped at 92) that prompt 4 refers to
-
-| # | Date | Purpose |
-|---|---|---|
-| 1 | 2026-11-01 | Full specification: business context, constraints, entities, ID formats, business logic, edge cases, ground truth, outputs, ten staged test gates, final acceptance check |
-| 2 | 2026-11-01 | Gaps to verify after the first delivery (full-scale validation, reproducibility, all five edge cases, deliverables), issues to fix, and a from-scratch verification sequence |
-| 3 | 2026-11-02 | Remaining issues: score saturation, prominence of the RULE-005 rationale, appended edge-case IDs |
-| 4 | 2026-11-02 | Minor issues: cross-rule score calibration, RULE-005 share of alerts |
 
 ## Prompt 1 — 2026-11-01
+
 
 ```text
 ROLE
@@ -171,15 +163,16 @@ WORKING RULES
 
 ## Prompt 2 — 2026-11-01
 
+
 ```text
-Not yet verified
+What this does not show
 
 1. Full-scale validation. You only validated the starter profile (20 findings, 20 expected). Run the validator on `output/full` and confirm the findings exactly match the injected edge cases there too.
 2. Reproducibility. The Stage 9 tests passed, but the checksum comparison output isn’t shown. Same seed should give identical checksums, and a different seed should give different ones.
 3. Three of the five edge cases. Q4 only shows negative balance and closed account. Confirm that unreconciled transfer legs, an alert with no triggering transaction, and a case disposition before its alert are each present and labelled in `ground_truth.csv`.
 4. Deliverables. Check that these actually exist: README, `PROMPT_LOG.md`, `schema.sql`, `seed.sql`, `source_manifest.json`, `validation_summary`, `checksums.sha256`, and the data dictionary.
 
-Issues
+Weak spots 
 
 * Score saturation: the top 10 alerts all score exactly 100.0, so the ranking in Q1 comes down to the tie-break. The brief asks for explainable ranking. Consider a score that doesn’t cap, or show the tie-break rule in the docs.
 * One rule dominates: `HIGH_AMOUNT_VS_PROFILE` produces about 73% of all alerts, with a 73.6% false-positive rate against about 30% for the others. The planted patterns have only about 64 alerts each. It’s defensible, but a more balanced mix looks more realistic. Document it as a deliberate design choice if you keep it.
@@ -187,24 +180,457 @@ Issues
 * Injected IDs: the injected transactions (TXN...99961 to 99980) have the highest IDs but earlier timestamps. That’s fine if documented as appended edge cases, but mention it in the README.
 * Repeated pytest sections: stages 5, 6 and 7 appear several times in the pytest output. This is probably parametrised fixtures regrouping the tests, so it’s harmless, but confirm no test runs twice by accident.
 
-Give me every command, in order, to verify all of this from a fresh start. Assume I have everything installed but have never tested the project before.
+
+
 ```
 
 ## Prompt 3 — 2026-11-02
 
+
+
 ```text
-Remaining issues
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python -m pip install -r requirements.txt
+[… 13 lines omitted …]
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python -m pytest
+[… 5 lines omitted …]
+collected 206 items                                                                          
+[… 18 lines omitted …]
+============================== 206 passed in 145.48s (0:02:25) ==============================
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python -m generator --profile starter
+[… 2 lines omitted …]
+validation: findings=20 expected_edge_cases=20 matched=20 exact_match=True
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python -m generator
+[… 2 lines omitted …]
+validation: findings=50 expected_edge_cases=50 matched=50 exact_match=True
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python -m generator.validator output/full
+[… 2 lines omitted …]
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python -m generator.reproducibility --profile full
+same seed identical: True (41/41 files)
+different seed: 34/41 files differ
+run A: sha256(checksums.sha256) = b4ad141369636dd1ab878c6dcfb477818a4423953f535133593b86329e9ceb10
+run B: sha256(checksums.sha256) = b4ad141369636dd1ab878c6dcfb477818a4423953f535133593b86329e9ceb10
+run C: sha256(checksums.sha256) = a45fd6ce4856858c9691d7cbe2fc1898a78d195f551c7b721639a65de8901791
+report: docs/reproducibility.md
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python -m generator.load_sqlite output/full
+loaded: customers=5000, kyc_profiles=5000, accounts=7000, merchants=500, devices=6810, account_devices=9514, account_status_history=8010, risk_rules=6, transactions=100000, transfer_links=3299, alerts=1000, alert_transactions=2241, cases=959, case_alerts=1000, analyst_actions=2930
+[… 48 lines omitted …]
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python scripts/acceptance_check.py output/full
+[1] Validator on this dataset: findings must equal the labelled edge cases
+[… 11 lines omitted …]
+--> PASS
+[2] Reproducibility: checksums verify; same seed identical; other seed different
+==============================================================================
+C:/Users/Lenovo SSD/Documents/YottaFlex --/output/full/checksums.sha256: 42 files listed, 0 do not verify, 0 unlisted
+  A            seed=20261022  sha256(checksums.sha256) = b4ad141369636dd1ab878c6dcfb477818a4423953f535133593b86329e9ceb10
+  B            seed=20261022  sha256(checksums.sha256) = b4ad141369636dd1ab878c6dcfb477818a4423953f535133593b86329e9ceb10
+  C            seed=20261023  sha256(checksums.sha256) = a45fd6ce4856858c9691d7cbe2fc1898a78d195f551c7b721639a65de8901791
+  this folder  seed=20261022  sha256(checksums.sha256) = 233efd449e0d32257eb20011f01c32559aebce014b8a76cefe1efc39d38d8a00
+  run A vs run B (same seed):  41/41 files byte-identical
+  run A vs run C (other seed): 34/41 files differ (identical ones are seed-independent: schema, docs, rule config)
+--> FAIL
+[3] All five edge cases: present, labelled in ground_truth.csv, visible in the data
+[… 21 lines omitted …]
+--> PASS
+[4] Deliverables exist and are not empty
+[… 22 lines omitted …]
+--> PASS
+[5] Row counts equal the requested parameters
+[… 5 lines omitted …]
+--> PASS
+[6] Ranking: score saturation and the deterministic tie-break
+==============================================================================
+  306 of 1000 alerts are at the 100 cap (metric at or beyond the rule's saturation value)
+  rule: priority_rank = order by score DESC, then created_at ASC (older first), then alert_idASC
+
+  rank   score  created_at           alert_id         rule
+     1  100.00  2026-01-21T14:00:00  ALT-2026-000002  RULE-005
+     2  100.00  2026-01-22T18:00:00  ALT-2026-000006  RULE-001
+     3  100.00  2026-01-26T01:00:00  ALT-2026-000010  RULE-005
+     4  100.00  2026-01-28T05:00:00  ALT-2026-000019  RULE-005
+     5  100.00  2026-01-28T11:00:00  ALT-2026-000020  RULE-005
+[… 8 lines omitted …]
+--> PASS
+[7] Rule mix and false-positive rate per rule (design information)
+[… 9 lines omitted …]
+--> INFO
+[8] The sixth rule
+[… 8 lines omitted …]
+--> PASS
+[9] Edge-case transactions are appended after the valid data (highest ids)
+[… 3 lines omitted …]
+--> PASS
+[10] Test collection: no test id appears twice
+[… 13 lines omitted …]
+--> PASS
+SUMMARY
+==============================================================================
+  PASS  full-scale validation
+  FAIL  reproducibility
+  PASS  five edge cases
+  PASS  deliverables
+  PASS  exact counts
+  PASS  ranking follows the documented order
+  INFO  rule mix
+  PASS  RULE-006 retired and silent
+  PASS  edge-case ids appended
+  PASS  no duplicated tests
+
+FAILED: ['reproducibility']
+[… 1 lines omitted …]
+
+ 
+
+is this perfect enough ?
+```
+
+## Prompt 4 — 2026-11-02
+
+
+
+```text
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python -m generator
+[… 2 lines omitted …]
+validation: findings=50 expected_edge_cases=50 matched=50 exact_match=True
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python scripts/acceptance_check.py output/full
+[1] Validator on this dataset: findings must equal the labelled edge cases
+[… 11 lines omitted …]
+--> PASS
+[2] Reproducibility: checksums verify; same seed identical; other seed different
+[… 9 lines omitted …]
+--> PASS
+[3] All five edge cases: present, labelled in ground_truth.csv, visible in the data
+[… 21 lines omitted …]
+--> PASS
+[4] Deliverables exist and are not empty
+[… 22 lines omitted …]
+--> PASS
+[5] Row counts equal the requested parameters
+[… 5 lines omitted …]
+--> PASS
+[6] Ranking: score saturation and the deterministic tie-break
+==============================================================================
+  306 of 1000 alerts are at the 100 cap (metric at or beyond the rule's saturation value)
+  rule: priority_rank = order by score DESC, then created_at ASC (older first), then alert_idASC
+
+  rank   score  created_at           alert_id         rule
+     1  100.00  2026-01-21T14:00:00  ALT-2026-000002  RULE-005
+     2  100.00  2026-01-22T18:00:00  ALT-2026-000006  RULE-001
+     3  100.00  2026-01-26T01:00:00  ALT-2026-000010  RULE-005
+     4  100.00  2026-01-28T05:00:00  ALT-2026-000019  RULE-005
+     5  100.00  2026-01-28T11:00:00  ALT-2026-000020  RULE-005
+[… 8 lines omitted …]
+--> PASS
+[7] Rule mix and false-positive rate per rule (design information)
+[… 9 lines omitted …]
+--> INFO
+[8] The sixth rule
+[… 8 lines omitted …]
+--> PASS
+[9] Edge-case transactions are appended after the valid data (highest ids)
+[… 3 lines omitted …]
+--> PASS
+[10] Test collection: no test id appears twice
+[… 13 lines omitted …]
+--> PASS
+SUMMARY
+==============================================================================
+  PASS  full-scale validation
+  PASS  reproducibility
+  PASS  five edge cases
+  PASS  deliverables
+  PASS  exact counts
+  PASS  ranking follows the documented order
+  INFO  rule mix
+  PASS  RULE-006 retired and silent
+  PASS  edge-case ids appended
+  PASS  no duplicated tests
+
+ALL CHECKS PASSED
+[… 1 lines omitted …]
+
+ 
+
+perfect enough??
+```
+
+## Prompt 5 — 2026-11-02
+
+
+
+```text
+Remaining weak spots  
 
 * 306 of 1000 alerts are capped at a score of 100, so the top ranks are decided by the tie-break (older first, then alert ID). It’s documented and deterministic, so it satisfies “explainable”, but a score that doesn’t saturate would look more polished.
 * RULE-005 produces about 74% of alerts, and its false-positive rate is 73.6% against roughly 30% for the others. The README explains this as deliberate, so keep that wording prominent.
 * The injected edge-case transaction IDs are the highest ones but have earlier timestamps. The acceptance check documents this, so mention it in the README too if it isn’t already there.
 ```
 
-## Prompt 4 — 2026-11-02
+## Prompt 6 — 2026-11-02
+
 
 ```text
-Minor issues (none are blockers)
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python -m generator
+[… 2 lines omitted …]
+validation: findings=50 expected_edge_cases=50 matched=50 exact_match=True
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python scripts/acceptance_check.py output/full
+[1] Validator on this dataset: findings must equal the labelled edge cases
+[… 11 lines omitted …]
+--> PASS
+[2] Reproducibility: checksums verify; same seed identical; other seed different
+[… 9 lines omitted …]
+--> PASS
+[3] All five edge cases: present, labelled in ground_truth.csv, visible in the data
+[… 21 lines omitted …]
+--> PASS
+[4] Deliverables exist and are not empty
+[… 22 lines omitted …]
+--> PASS
+[5] Row counts equal the requested parameters
+[… 5 lines omitted …]
+--> PASS
+[6] Ranking: score saturation and the deterministic tie-break
+==============================================================================
+  306 of 1000 alerts are at the 100 cap (metric at or beyond the rule's saturation value)
+  rule: priority_rank = order by score DESC, then created_at ASC (older first), then alert_idASC
 
-* The top 12 are all RULE-002 alerts, because its raw metric is a large amount and scales high, while RULE-005 is capped at 92. State that scores are comparable within a rule but not calibrated across rules, and document this as a design choice.
+  rank   score  created_at           alert_id         rule
+     1  100.00  2026-01-21T14:00:00  ALT-2026-000002  RULE-005
+     2  100.00  2026-01-22T18:00:00  ALT-2026-000006  RULE-001
+     3  100.00  2026-01-26T01:00:00  ALT-2026-000010  RULE-005
+     4  100.00  2026-01-28T05:00:00  ALT-2026-000019  RULE-005
+     5  100.00  2026-01-28T11:00:00  ALT-2026-000020  RULE-005
+[… 8 lines omitted …]
+--> PASS
+[7] Rule mix and false-positive rate per rule (design information)
+[… 9 lines omitted …]
+--> INFO
+[8] The sixth rule
+[… 8 lines omitted …]
+--> PASS
+[9] Edge-case transactions are appended after the valid data (highest ids)
+[… 3 lines omitted …]
+--> PASS
+[10] Test collection: no test id appears twice
+[… 13 lines omitted …]
+--> PASS
+SUMMARY
+==============================================================================
+  PASS  full-scale validation
+  PASS  reproducibility
+  PASS  five edge cases
+  PASS  deliverables
+  PASS  exact counts
+  PASS  ranking follows the documented order
+  INFO  rule mix
+  PASS  RULE-006 retired and silent
+  PASS  edge-case ids appended
+  PASS  no duplicated tests
+
+ALL CHECKS PASSED
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python -m generator
+[… 2 lines omitted …]
+validation: findings=50 expected_edge_cases=50 matched=50 exact_match=True
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python scripts/acceptance_check.py output/full
+[1] Validator on this dataset: findings must equal the labelled edge cases
+[… 11 lines omitted …]
+--> PASS
+[2] Reproducibility: checksums verify; same seed identical; other seed different
+[… 9 lines omitted …]
+--> PASS
+[3] All five edge cases: present, labelled in ground_truth.csv, visible in the data
+[… 21 lines omitted …]
+--> PASS
+[4] Deliverables exist and are not empty
+[… 22 lines omitted …]
+--> PASS
+[5] Row counts equal the requested parameters
+[… 5 lines omitted …]
+--> PASS
+[6] Ranking: non-saturating score and the deterministic tie-break
+==============================================================================
+  alerts at score 100: 0; distinct scores: 746 for 1000 alerts; largest group sharing one score: 19
+  distinct scores among the top 10: 10
+  rule: priority_rank = order by score DESC, then created_at ASC (older first), then alert_idASC
+
+  rank   score        metric  created_at           alert_id         rule
+     1   99.95       37.6576  2026-05-31T20:00:00  ALT-2026-000499  RULE-005
+     2   99.90       34.0427  2026-07-05T00:00:00  ALT-2026-000621  RULE-005
+     3   99.77       29.5988  2026-07-02T01:00:00  ALT-2026-000613  RULE-005
+     4   99.68       27.9921  2026-09-28T00:00:00  ALT-2026-000930  RULE-005
+     5   99.64       27.3551  2026-08-15T10:00:00  ALT-2026-000755  RULE-005
+[… 7 lines omitted …]
+--> PASS
+[7] Rule mix and false-positive rate per rule (design information)
+[… 9 lines omitted …]
+--> INFO
+[8] The sixth rule
+[… 8 lines omitted …]
+--> PASS
+[9] Edge-case transactions are appended after the valid data (highest ids)
+[… 3 lines omitted …]
+--> PASS
+[10] Test collection: no test id appears twice
+[… 13 lines omitted …]
+--> PASS
+SUMMARY
+==============================================================================
+  PASS  full-scale validation
+  PASS  reproducibility
+  PASS  five edge cases
+  PASS  deliverables
+  PASS  exact counts
+  PASS  ranking follows the documented order
+  INFO  rule mix
+  PASS  RULE-006 retired and silent
+  PASS  edge-case ids appended
+  PASS  no duplicated tests
+
+ALL CHECKS PASSED
+[… 1 lines omitted …]
+```
+
+## Prompt 7 — 2026-11-02
+
+
+
+```text
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python -m generator
+[… 2 lines omitted …]
+validation: findings=50 expected_edge_cases=50 matched=50 exact_match=True
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python -m generator.reproducibility --profile full
+same seed identical: True (41/41 files)
+different seed: 34/41 files differ
+run A: sha256(checksums.sha256) = 7d05fc11f8f370c23c63649db8f4c015ac12657bdd3d1b51eaa50ed027c2eb26
+run B: sha256(checksums.sha256) = 7d05fc11f8f370c23c63649db8f4c015ac12657bdd3d1b51eaa50ed027c2eb26
+run C: sha256(checksums.sha256) = a33a9718abdab45041c59d2528a2719edf3d7f6ce8c24851d804d9db7a8fc805
+report: docs/reproducibility.md
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python scripts/acceptance_check.py output/full
+[1] Validator on this dataset: findings must equal the labelled edge cases
+[… 11 lines omitted …]
+--> PASS
+[2] Reproducibility: checksums verify; same seed identical; other seed different
+[… 9 lines omitted …]
+--> PASS
+[3] All five edge cases: present, labelled in ground_truth.csv, visible in the data
+[… 21 lines omitted …]
+--> PASS
+[4] Deliverables exist and are not empty
+[… 22 lines omitted …]
+--> PASS
+[5] Row counts equal the requested parameters
+[… 5 lines omitted …]
+--> PASS
+[6] Ranking: non-saturating score and the deterministic tie-break
+[… 20 lines omitted …]
+--> PASS
+[7] Rule mix and false-positive rate per rule (design information)
+[… 9 lines omitted …]
+--> INFO
+[8] The sixth rule
+[… 8 lines omitted …]
+--> PASS
+[9] Edge-case transactions are appended after the valid data (highest ids)
+[… 3 lines omitted …]
+--> PASS
+[10] Test collection: no test id appears twice
+[… 13 lines omitted …]
+--> PASS
+SUMMARY
+==============================================================================
+  PASS  full-scale validation
+  PASS  reproducibility
+  PASS  five edge cases
+  PASS  deliverables
+  PASS  exact counts
+  PASS  ranking follows the documented order
+  INFO  rule mix
+  PASS  RULE-006 retired and silent
+  PASS  edge-case ids appended
+  PASS  no duplicated tests
+
+ALL CHECKS PASSED
+[… 1 lines omitted …]
+```
+
+
+## Prompt 8 — 2026-11-02
+
+
+```text
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python -m generator
+[… 2 lines omitted …]
+validation: findings=50 expected_edge_cases=50 matched=50 exact_match=True
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python -m generator.reproducibility --profile full
+same seed identical: True (41/41 files)
+different seed: 34/41 files differ
+run A: sha256(checksums.sha256) = 7d05fc11f8f370c23c63649db8f4c015ac12657bdd3d1b51eaa50ed027c2eb26
+run B: sha256(checksums.sha256) = 7d05fc11f8f370c23c63649db8f4c015ac12657bdd3d1b51eaa50ed027c2eb26
+run C: sha256(checksums.sha256) = a33a9718abdab45041c59d2528a2719edf3d7f6ce8c24851d804d9db7a8fc805
+report: docs/reproducibility.md
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python scripts/acceptance_check.py output/full
+[1] Validator on this dataset: findings must equal the labelled edge cases
+[… 11 lines omitted …]
+--> PASS
+[2] Reproducibility: checksums verify; same seed identical; other seed different
+[… 9 lines omitted …]
+--> PASS
+[3] All five edge cases: present, labelled in ground_truth.csv, visible in the data
+[… 21 lines omitted …]
+--> PASS
+[4] Deliverables exist and are not empty
+[… 22 lines omitted …]
+--> PASS
+[5] Row counts equal the requested parameters
+[… 5 lines omitted …]
+--> PASS
+[6] Ranking: non-saturating score and the deterministic tie-break
+[… 20 lines omitted …]
+--> PASS
+[7] Rule mix and false-positive rate per rule (design information)
+[… 9 lines omitted …]
+--> INFO
+[8] The sixth rule
+[… 8 lines omitted …]
+--> PASS
+[9] Edge-case transactions are appended after the valid data (highest ids)
+[… 3 lines omitted …]
+--> PASS
+[10] Test collection: no test id appears twice
+[… 13 lines omitted …]
+--> PASS
+SUMMARY
+==============================================================================
+  PASS  full-scale validation
+  PASS  reproducibility
+  PASS  five edge cases
+  PASS  deliverables
+  PASS  exact counts
+  PASS  ranking follows the documented order
+  INFO  rule mix
+  PASS  RULE-006 retired and silent
+  PASS  edge-case ids appended
+  PASS  no duplicated tests
+
+ALL CHECKS PASSED
+(.venv) PS C:\Users\Lenovo SSD\Documents\YottaFlex --> python -m pytest
+[… 5 lines omitted …]
+collected 209 items                                                                          
+[… 18 lines omitted …]
+============================== 209 passed in 171.37s (0:02:51) ==============================
+[… 1 lines omitted …]
+
+ 
+
+perfect enough right ?
+```
+
+## Prompt 9 — 2026-11-02
+
+
+
+```text
+Minor points  (none are blockers)
+
+* The top 12 are all RULE-002 alerts, because its raw metric is a large amount and scales high, while RULE-005 is capped at 92. If asked, say scores are comparable within a rule but not calibrated across rules, and that this is a documented design choice.
 * RULE-005 still produces about 74% of alerts, with a false-positive rate of about 74%. This is documented as deliberate in the README.
 ```
